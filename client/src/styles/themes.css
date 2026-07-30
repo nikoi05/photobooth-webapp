@@ -1,0 +1,38 @@
+@theme {
+  --color-background: #F3E8D3;
+  --color-primary: #9E3B2C;
+  --color-secondary: #D64B36;
+  --color-surface: #EBDCB9;
+}
+
+.bg-theme {
+  background-color: var(--color-background);
+}
+
+.bg-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-secondary {
+  background-color: var(--color-secondary);
+}
+
+.bg-surface {
+  background-color: var(--color-surface);
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-secondary {
+  color: var(--color-secondary);
+}
+
+.font-baybayin {
+  font-family: "baybayin", sans-serif;
+}
+
+.font-main {
+  font-family: "DM Serif Display", serif;
+}
