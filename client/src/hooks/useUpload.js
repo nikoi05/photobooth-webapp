@@ -27,6 +27,8 @@
  *   - Total count must not exceed requiredCount
  */
 import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { uploadPhotoStrip } from "../services/upload.service";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_SIZE_BYTES = 25 * 1024 * 1024;
@@ -79,6 +81,7 @@ function createPhotoEntry(file) {
    useUpload
 ───────────────────────────────────────────────────────────────── */
 export function useUpload(requiredCount = 4) {
+  const navigate = useNavigate();
   const [photos, setPhotos] = useState([]);
   const [error,  setError]  = useState(null);
 
@@ -160,6 +163,19 @@ export function useUpload(requiredCount = 4) {
     setError(null);
   }, []);
 
+  const Generate = async (data) => {
+  
+  const filter = data.filter.id;
+  const format = data.format.id;
+   try {
+      const response = await uploadPhotoStrip(photos,filter,format);
+      if (response.success) {
+        navigate("/preview");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return {
     photos,
     error,
@@ -167,5 +183,6 @@ export function useUpload(requiredCount = 4) {
     addPhotos,
     removePhoto,
     clearPhotos,
+    Generate,
   };
 }

@@ -19,6 +19,7 @@ import { useUpload } from "../hooks/useUpload";
 function PhotoGrid({ photos, requiredCount, onRemove, onSlotClick, filter }) {
   const empty = Array.from({ length: requiredCount - photos.length });
 
+
   return (
     <div className="flex flex-wrap justify-center gap-4">
       {photos.map((photo, i) => (
@@ -84,6 +85,8 @@ export default function UploadPage() {
   const { currentStep, displayStep, goToStep } = useStepFlow(1);
   const [format, setFormat] = useState(null);
   const [filter, setFilter] = useState(FILTERS[0]);
+  console.log(filter);
+  console.log(format);
 
   // Page entrance animation
   const [entered, setEntered] = useState(false);
@@ -101,7 +104,7 @@ export default function UploadPage() {
   });
 
   const requiredCount = format?.requiredCount ?? 4;
-  const { photos, error, isFull, addPhotos, removePhoto, clearPhotos } =
+  const { photos, error, isFull, addPhotos, removePhoto, clearPhotos, Generate } =
     useUpload(requiredCount);
 
   // Auto-advance to filter step once all slots filled
@@ -125,7 +128,6 @@ export default function UploadPage() {
       e.target.value = "";
     }
   };
-
   return (
     <div className="min-h-screen bg-theme flex flex-col">
 
@@ -223,7 +225,9 @@ export default function UploadPage() {
                 onChange={setFilter}
                 previewSrc={photos[0]?.previewUrl}
               />
-              <PrimaryButton onClick={() => navigate("/preview")}>
+              <p>{format ? "format exist" : "format is null"}</p>
+                <p>{filter ? "filter exist" : "filter is null"}</p>
+              <PrimaryButton onClick={()=>Generate({filter,format})} >
                 Generate Strip →
               </PrimaryButton>
               <BackLink onClick={() => goToStep(2)} label="change photos" />

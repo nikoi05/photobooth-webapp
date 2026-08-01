@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/landing-page";
 import ChooseInputPage from "./pages/choose-option-page";
 import UploadPage from "./pages/upload-page";
+import PreviewPage from "./pages/preview-page";
 
 export default function App() {
   return (
@@ -9,6 +10,7 @@ export default function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/start" element={<ChooseInputPage />} />
       <Route path="/upload" element={<UploadPage />} />
+      <Route path="/preview" element={<PreviewPage />} />
     </Routes>
   );
 }
