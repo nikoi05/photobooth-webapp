@@ -48,18 +48,17 @@ export default function LiveStripPreview({
 
       {/* ── Strip card ─────────────────────────────────────────── */}
       {/*
-        Width logic:
-          - Desktop (sidebar): 18vw, capped at 160px
-          - Tablet/mobile (column layout, ≤1024px): 35vw, capped at 200px, min 130px
-        Handled via a scoped media query so this component stays self-contained.
+        Width:
+          Desktop sidebar (>1024px): 14vw, min 140px, max 220px
+          Tablet/mobile column (≤1024px): 40vw, min 150px, max 240px
       */}
       <style>{`
         .live-strip-card {
-          width: clamp(100px, 18vw, 160px);
+          width: clamp(140px, 14vw, 220px);
         }
         @media (max-width: 1024px) {
           .live-strip-card {
-            width: clamp(130px, 35vw, 200px);
+            width: clamp(150px, 40vw, 240px);
           }
         }
       `}</style>
@@ -68,13 +67,13 @@ export default function LiveStripPreview({
         className="live-strip-card"
         style={{
           backgroundColor: "#ffffff",
-          padding: "6px 6px 0 6px",
+          padding: "8px 8px 0 8px",
           boxShadow: "0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08)",
           borderRadius: "2px",
         }}
       >
         {/* Photo slots */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
           {slots.map((photo, i) => (
             <div
               key={i}
@@ -129,20 +128,19 @@ export default function LiveStripPreview({
         {/* ── Bottom label area ────────────────────────────────── */}
         <div
           style={{
-            padding: "8px 4px 10px",
+            padding: "10px 4px 14px",
             textAlign: "center",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: "2px",
+            gap: "3px",
           }}
         >
-          {/* Italic script title */}
           <p
             style={{
               fontFamily: '"DM Serif Display", serif',
               fontStyle: "italic",
-              fontSize: "clamp(0.55rem, 1.2vw, 0.75rem)",
+              fontSize: "clamp(0.6rem, 1.2vw, 0.85rem)",
               color: "#1a1a1a",
               lineHeight: 1.2,
               margin: 0,
@@ -150,15 +148,11 @@ export default function LiveStripPreview({
           >
             {title}
           </p>
-
-          {/* Divider */}
           <div style={{ width: "60%", height: "0.5px", backgroundColor: "#ccc", margin: "2px 0" }} />
-
-          {/* Small caps subtitle */}
           <p
             style={{
               fontFamily: '"DM Serif Display", serif',
-              fontSize: "clamp(0.4rem, 0.9vw, 0.55rem)",
+              fontSize: "clamp(0.45rem, 0.9vw, 0.6rem)",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: "#555",

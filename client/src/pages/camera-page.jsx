@@ -249,7 +249,12 @@ function CameraView({
       {/* ── Viewfinder ─────────────────────────────────────────── */}
       <div
         className="relative rounded-2xl overflow-hidden bg-black shadow-xl w-full"
-        style={{ maxWidth: "clamp(260px, 80vw, 480px)", aspectRatio: "4/3", margin: "0 auto" }}
+        style={{
+          maxWidth: "min(90vw, 55vh * 4/3)",
+          maxHeight: "55vh",
+          aspectRatio: "4/3",
+          margin: "0 auto",
+        }}
       >
         {/* Mirror controlled by isMirrored prop */}
         <video
@@ -305,16 +310,100 @@ function CameraView({
         )}
       </div>
 
-      {/* ── Camera controls bar ────────────────────────────────── */}
-      <CameraControlsBar
-        isCamReady={isCamReady}
-        isShooting={isShooting}
-        isMirrored={isMirrored}
-        onToggleMirror={onToggleMirror}
-        devices={devices}
-        activeDeviceId={activeDeviceId}
-        onSwitchCamera={onSwitchCamera}
-      />
+      {/* ── Controls row: mirror | capture | camera selector ── */}
+      {isCamReady && !isShooting && (
+        <div
+          className="flex items-center justify-between w-full"
+          style={{ maxWidth: "min(90vw, 55vh * 4/3)", margin: "0 auto" }}
+        >
+          {/* Left slot — mirror toggle normally, retake when all captured */}
+          {allCaptured ? (
+            <button
+              onClick={onRetake}
+              className="font-main text-sm text-black/35 hover:text-primary transition-colors duration-200 cursor-pointer bg-transparent border-none p-0"
+            >
+              ↺ retake
+            </button>
+          ) : (
+            <button
+              onClick={onToggleMirror}
+              aria-pressed={isMirrored}
+              aria-label={isMirrored ? "Disable mirror" : "Enable mirror"}
+              title={isMirrored ? "Mirror: on" : "Mirror: off"}
+              className={`
+                flex items-center gap-1.5 px-3 py-1.5 rounded-full border
+                font-main text-xs transition-all duration-200
+                cursor-pointer select-none
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
+                ${isMirrored
+                  ? "bg-primary border-primary text-white shadow-sm"
+                  : "bg-surface border-surface text-black/50 hover:border-primary/40 hover:text-black/70"
+                }
+              `}
+            >
+              <MirrorIcon mirrored={isMirrored} />
+              <span>Mirror</span>
+            </button>
+          )}
+
+          {/* Center slot — capture or looks good */}
+          <PrimaryButton onClick={onStart}>
+            {allCaptured
+              ? "Looks good →"
+              : photos.length === 0
+                ? `Start (${requiredCount} shots)`
+                : `Continue (${remaining} left)`}
+          </PrimaryButton>
+
+          {/* Right slot — camera selector or spacer */}
+          {devices.length > 1 ? (
+            <div className="relative flex items-center">
+              <span className="absolute left-2.5 pointer-events-none text-black/40" aria-hidden="true">
+                <SmallCameraIcon />
+              </span>
+              <select
+                value={activeDeviceId ?? ""}
+                onChange={(e) => onSwitchCamera(e.target.value)}
+                aria-label="Select camera"
+                className="
+                  appearance-none
+                  bg-surface border border-surface
+                  hover:border-primary/40
+                  font-main text-xs text-black/70
+                  pl-8 pr-6 py-1.5 rounded-full
+                  cursor-pointer
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
+                  transition-colors duration-200
+                "
+                style={{ minWidth: "8rem" }}
+              >
+                {devices.map((device, i) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label
+                      ? device.label.replace(/\s*\(.*?\)\s*/g, "").trim() || `Camera ${i + 1}`
+                      : `Camera ${i + 1}`}
+                  </option>
+                ))}
+              </select>
+              <span className="absolute right-2.5 pointer-events-none text-black/40" aria-hidden="true">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+            </div>
+          ) : (
+            <div style={{ width: "80px" }} />
+          )}
+        </div>
+      )}
+
+      {/* Shooting hint */}
+      {isShooting && (
+        <p className="font-main italic text-black/50 text-sm">Get ready…</p>
+      )}
+
+      {/* Error retry */}
+      {error && <PrimaryButton onClick={onStart}>Try again</PrimaryButton>}
 
       {/* ── Thumbnail row ──────────────────────────────────────── */}
       {photos.length > 0 && (
@@ -336,7 +425,6 @@ function CameraView({
               </span>
             </div>
           ))}
-          {/* Empty slots */}
           {Array.from({ length: remaining }).map((_, i) => (
             <div
               key={`empty-${i}`}
@@ -347,43 +435,6 @@ function CameraView({
           ))}
         </div>
       )}
-
-      {/* ── Action controls ────────────────────────────────────── */}
-      <div className="flex flex-col items-center gap-3">
-        {!allCaptured && isCamReady && !isShooting && (
-          <PrimaryButton onClick={onStart}>
-            {photos.length === 0
-              ? `Start (${requiredCount} shots)`
-              : `Continue (${remaining} left)`}
-          </PrimaryButton>
-        )}
-
-        {isShooting && (
-          <p className="font-main italic text-black/50 text-sm">
-            Get ready…
-          </p>
-        )}
-
-        {allCaptured && (
-          <div className="flex items-center gap-4 flex-wrap justify-center">
-            <button
-              onClick={onRetake}
-              className="font-main text-sm text-black/35 hover:text-primary transition-colors duration-200 cursor-pointer bg-transparent border-none p-0"
-            >
-              ↺ retake all
-            </button>
-            <PrimaryButton onClick={onStart}>
-              Looks good →
-            </PrimaryButton>
-          </div>
-        )}
-
-        {error && (
-          <PrimaryButton onClick={onStart}>
-            Try again
-          </PrimaryButton>
-        )}
-      </div>
 
     </div>
   );
@@ -588,7 +639,7 @@ export default function CameraPage() {
 
   /* ── Render ─────────────────────────────────────────────────── */
   return (
-    <div className="min-h-screen bg-theme flex flex-col">
+    <div className="h-svh bg-theme flex flex-col overflow-hidden">
 
       {/* Countdown pop keyframe — injected once */}
       <style>{`
@@ -599,23 +650,15 @@ export default function CameraPage() {
         }
       `}</style>
 
-      <header className="sticky top-0 z-50 w-full px-8 pt-4 pb-2 md:px-6 md:pt-3 sm:px-4 sm:pt-2">
+      <header className="shrink-0 z-50 w-full px-4 pt-4 pb-2 sm:px-3 sm:pt-3">
         <div style={fade(0)}>
-          <NavBar />
-        </div>
-        <div className="mt-3 pl-1" style={fade(80)}>
-          <button
-            onClick={() => navigate("/start")}
-            className="font-main text-sm text-black/35 hover:text-primary transition-colors duration-200 cursor-pointer bg-transparent border-none p-0"
-          >
-            ← back to options
-          </button>
+          <NavBar backLabel="← options" onBack={() => navigate("/start")} />
         </div>
       </header>
 
-      <main className="flex-1 flex justify-center px-8 pt-6 pb-12 md:px-6 sm:px-4">
+      <main className="flex-1 flex justify-center px-4 py-3 sm:px-3 overflow-y-auto">
         <div
-          className="w-full max-w-4xl flex items-start gap-10 lg:flex-row flex-col"
+          className="w-full flex items-center gap-6 lg:flex-row flex-col"
           style={{ justifyContent: "center", ...fade(160) }}
         >
 
@@ -624,7 +667,6 @@ export default function CameraPage() {
             style={{
               flex:      currentStep >= 2 ? "1" : "0 0 auto",
               width:     currentStep >= 2 ? "auto" : "100%",
-              maxWidth:  "36rem",
               margin:    currentStep >= 2 ? "0" : "0 auto",
               transition: "flex 1000ms ease, margin 500ms ease-in-out",
             }}
@@ -641,7 +683,7 @@ export default function CameraPage() {
                 selected={format?.id ?? null}
                 onChange={handleFormatChange}
               />
-              <div className="mt-8">
+              <div className="mt-6">
                 <PrimaryButton disabled={!format} onClick={() => goToStep(2)}>
                   Confirm Selection
                 </PrimaryButton>

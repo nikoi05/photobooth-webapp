@@ -190,56 +190,91 @@ useEffect(() => {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center gap-8 px-8 py-12 md:px-6 sm:px-4">
+      <main className="flex-1 flex items-center justify-center px-8 py-6 md:px-6 sm:px-4 overflow-hidden">
 
-        {/* Heading */}
-        <div className="flex flex-col items-center gap-2 text-center" style={fade(100)}>
-          <h1
-            className="font-main font-bold text-black tracking-tight leading-none"
-            style={{ fontSize: "clamp(1rem, 4vw, 2rem)" }}
+        {strip.imageUrl ? (
+          /* ── Strip left, actions right ──────────────────────── */
+          <div
+            className="flex flex-row items-center justify-center gap-10 md:gap-8 w-full max-w-3xl"
+            style={fade(100)}
           >
-            Your Strip
-          </h1>
-          <p
-            className="font-main italic text-black/50"
-            style={{ fontSize: "clamp(0.85rem, 1.8vw, 1rem)" }}
-          >
-            {strip.imageUrl ? "Looking good! Save or start over." : "No strip generated yet."}
-          </p>
-        </div>
-
-        {/* Strip preview */}
-        <div style={fade(200)}>
-          {strip.imageUrl ? (
+            {/* Strip — height-constrained so it never pushes buttons off screen */}
             <div
               style={{
                 backgroundColor: "#ffffff",
-                padding: "10px 10px 0 10px",
-                boxShadow: "0 8px 40px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08)",
+                padding: "8px 8px 0 8px",
+                boxShadow: "0 12px 48px rgba(0,0,0,0.20), 0 2px 10px rgba(0,0,0,0.08)",
                 borderRadius: "2px",
-                width: "clamp(160px, 45vw, 220px)",
-              }}  
+                flexShrink: 0,
+                maxHeight: "80vh",
+                width: "auto",
+                display: "flex",
+                flexDirection: "column",
+              }}
             >
               <img
                 src={`http://localhost:3000${strip.imageUrl}`}
                 alt="Your generated photo strip"
-                style={{ width: "100%", display: "block" }}
-              />
-              {/* Label area */}
-              <div
                 style={{
-                  padding: "10px 4px 14px",
-                  textAlign: "center",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "3px",
+                  display: "block",
+                  maxHeight: "calc(80vh - 60px)",
+                  width: "auto",
+                  objectFit: "contain",
                 }}
-              >
-              </div>
+              />
+              {/* Bottom label */}
+             
             </div>
-          ) : (
-            /* Fallback — no strip data */
+
+            {/* Action panel */}
+            <div className="flex flex-col gap-5">
+
+              <div className="flex flex-col gap-1">
+                <h1
+                  className="font-main font-bold text-black tracking-tight leading-none"
+                  style={{ fontSize: "clamp(1.6rem, 3vw, 2.8rem)" }}
+                >
+                  Your Strip
+                </h1>
+                <p className="font-main italic text-black/45" style={{ fontSize: "clamp(0.8rem, 1.2vw, 0.95rem)" }}>
+                  Looking good! Save or share it.
+                </p>
+              </div>
+
+              <div className="w-10 h-px bg-primary/25" />
+
+              <div className="flex flex-col gap-3">
+                <PrimaryButton onClick={handleDownload}>
+                  Download Strip ↓
+                </PrimaryButton>
+                <button
+                  onClick={handleShare}
+                  className="
+                    font-main text-sm
+                    bg-surface hover:bg-primary/10
+                    text-black/60 hover:text-primary
+                    px-8 py-3.5 rounded-full
+                    border border-primary/15 hover:border-primary/40
+                    transition-all duration-200 cursor-pointer select-none
+                    focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/30
+                  "
+                >
+                  {copyFeedback ? "✓ Link copied!" : "Share →"}
+                </button>
+              </div>
+
+              <button
+                onClick={() => navigate(backPath)}
+                className="font-main text-xs text-black/30 hover:text-primary transition-colors duration-200 cursor-pointer bg-transparent border-none p-0"
+              >
+                ← start over
+              </button>
+
+            </div>
+          </div>
+        ) : (
+          /* ── No strip fallback ─────────────────────────────── */
+          <div className="flex flex-col items-center gap-6" style={fade(100)}>
             <div
               className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-primary/25 bg-surface/60"
               style={{ width: "clamp(140px, 18vw, 220px)", aspectRatio: "1/2.5" }}
@@ -247,33 +282,18 @@ useEffect(() => {
               <span className="text-primary/30 text-5xl">📸</span>
               <p className="font-main text-xs text-primary/35 mt-3">No strip yet</p>
             </div>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="flex flex-col items-center gap-3 w-full" style={fade(300)}>
-          {strip.imageUrl && (
-            <PrimaryButton onClick={handleDownload}>
-              Download Strip ↓
-            </PrimaryButton>
-          )}
-          {strip.imageUrl && (
             <button
-              onClick={handleShare}
-              className="font-main text-sm text-black/60 hover:text-primary transition-colors duration-200 cursor-pointer bg-transparent border-none p-0"
+              onClick={() => navigate(backPath)}
+              className="font-main text-sm text-black/35 hover:text-primary transition-colors duration-200 cursor-pointer bg-transparent border-none p-0"
             >
-              {copyFeedback ? "✓ Link copied!" : "Share →"}
+              ← start over
             </button>
-          )}
-          <button
-            onClick={() => navigate(backPath)}
-            className="font-main text-sm text-black/35 hover:text-primary transition-colors duration-200 cursor-pointer bg-transparent border-none p-0"
-          >
-            ← start over
-          </button>
-        </div>
+          </div>
+        )}
 
       </main>
     </div>
   );
 }
+
+

@@ -1,10 +1,11 @@
 /**
- * NavBar — sticky top navigation.
+ * NavBar — sticky top navigation pill.
  *
- * - Brand name navigates to "/" (landing page).
- * - "how to use" and "About Us" navigate to "/" then scroll to their section.
- *   If already on "/", they scroll directly without a page transition.
- * - On mobile (<640px): links collapse into a hamburger menu.
+ * Optional props:
+ *   backLabel  {string}      If provided, shows a back chevron on the left inside the pill
+ *   onBack     {() => void}  Called when the back button is clicked
+ *
+ * On mobile (<640px): nav links collapse into a hamburger menu.
  */
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -22,7 +23,7 @@ function useScrollNav() {
   };
 }
 
-export default function NavBar() {
+export default function NavBar({ backLabel, onBack }) {
   const navigate  = useNavigate();
   const scrollTo  = useScrollNav();
   const [open, setOpen] = useState(false);
@@ -36,13 +37,25 @@ export default function NavBar() {
     <nav className="bg-surface rounded-full px-6 py-4 w-full relative">
       <div className="flex justify-between items-center">
 
-        {/* Brand */}
-        <button
-          onClick={() => navigate("/")}
-          className="text-black font-main text-2xl md:text-xl hover:text-primary transition-colors duration-200 cursor-pointer bg-transparent border-none p-0"
-        >
-          Sandali
-        </button>
+        {/* Left side — back button or empty */}
+        <div className="flex items-center gap-4">
+          {backLabel && onBack && (
+            <button
+              onClick={onBack}
+              className="font-main text-sm text-black/40 hover:text-primary transition-colors duration-200 cursor-pointer bg-transparent border-none p-0 flex items-center gap-1"
+            >
+              ← {backLabel}
+            </button>
+          )}
+
+          {/* Brand — always goes to landing page */}
+          <button
+            onClick={() => navigate("/")}
+            className={`text-black font-main text-2xl md:text-xl hover:text-primary transition-colors duration-200 cursor-pointer bg-transparent border-none p-0 ${backLabel ? "hidden sm:block" : ""}`}
+          >
+            Sandali
+          </button>
+        </div>
 
         {/* Desktop links — hidden below sm */}
         <div className="hidden sm:flex text-black font-main gap-10 text-base md:gap-8">
@@ -69,9 +82,7 @@ export default function NavBar() {
         >
           <span
             className="block w-5 h-0.5 bg-black transition-all duration-300 origin-center"
-            style={{
-              transform: open ? "translateY(8px) rotate(45deg)" : "none",
-            }}
+            style={{ transform: open ? "translateY(8px) rotate(45deg)" : "none" }}
           />
           <span
             className="block w-5 h-0.5 bg-black transition-all duration-300"
@@ -79,15 +90,13 @@ export default function NavBar() {
           />
           <span
             className="block w-5 h-0.5 bg-black transition-all duration-300 origin-center"
-            style={{
-              transform: open ? "translateY(-8px) rotate(-45deg)" : "none",
-            }}
+            style={{ transform: open ? "translateY(-8px) rotate(-45deg)" : "none" }}
           />
         </button>
 
       </div>
 
-      {/* Mobile dropdown — slides down below the pill */}
+      {/* Mobile dropdown */}
       {open && (
         <div className="sm:hidden absolute left-0 right-0 top-full mt-2 bg-surface rounded-3xl shadow-lg px-6 py-4 flex flex-col gap-4 z-50">
           <button

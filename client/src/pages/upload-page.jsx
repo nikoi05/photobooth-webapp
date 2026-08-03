@@ -123,7 +123,7 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-theme flex flex-col">
+    <div className="h-svh bg-theme flex flex-col overflow-hidden">
 
       {/* Always-mounted hidden file input */}
       <input
@@ -135,23 +135,15 @@ export default function UploadPage() {
         onChange={handleFileInput}
       />
 
-      <header className="sticky top-0 z-50 w-full px-8 pt-4 pb-2 md:px-6 md:pt-3 sm:px-4 sm:pt-2">
+      <header className="shrink-0 z-50 w-full px-4 pt-4 pb-2 sm:px-3 sm:pt-3">
         <div style={fade(0)}>
-          <NavBar />
-        </div>
-        <div className="mt-3 pl-1" style={fade(80)}>
-          <button
-            onClick={() => navigate("/start")}
-            className="font-main text-sm text-black/35 hover:text-primary transition-colors duration-200 cursor-pointer bg-transparent border-none p-0"
-          >
-            ← back to options
-          </button>
+          <NavBar backLabel="options" onBack={() => navigate("/start")} />
         </div>
       </header>
 
-      <main className="flex-1 flex justify-center px-8 pt-6 pb-12 md:px-6 sm:px-4">
+      <main className="flex-1 flex justify-center px-4 py-3 sm:px-3 overflow-y-auto">
         <div
-          className="w-full max-w-4xl flex items-start gap-10 lg:flex-row flex-col"
+          className="w-full flex items-center gap-6 lg:flex-row flex-col"
           style={{ justifyContent: "center", ...fade(160) }}
         >
           {/* ── Steps — centered alone on step 1, shifts left when preview appears ── */}
@@ -159,7 +151,6 @@ export default function UploadPage() {
             style={{
               flex: currentStep >= 2 ? "1" : "0 0 auto",
               width: currentStep >= 2 ? "auto" : "100%",
-              maxWidth: "36rem",
               margin: currentStep >= 2 ? "0" : "0 auto",
               transition: "flex 1000ms ease, margin 500ms ease-in-out",
             }}
@@ -173,7 +164,7 @@ export default function UploadPage() {
                 hint="How many photos in your strip?"
               />
               <FormatPicker selected={format?.id ?? null} onChange={handleFormatChange} />
-              <div className="mt-8">
+              <div className="mt-6">
                 <PrimaryButton disabled={!format} onClick={() => goToStep(2)}>
                   Confirm Selection
                 </PrimaryButton>

@@ -5,6 +5,8 @@
     import { applyFilter } from "./filterService.js";
     import createShare from "./share.service.js";
 import strip4Layout from "./layouts/strip-4-layout.js";
+import strip3Layout from "./layouts/strip-3-layouts.js";
+import strip2Layout from "./layouts/strip-2-layout.js";
 
     export  default async function processImage(filePath, formatId, filterId) {
         //decider
@@ -23,6 +25,15 @@ import strip4Layout from "./layouts/strip-4-layout.js";
 
             
                 switch(formatId){
+                    case "strip-2":
+                        layout = strip2Layout;
+                        break;
+                    case "strip-3":
+                        layout = strip3Layout;
+                        break;
+                    case "strip-4":
+                        layout = strip4Layout;
+                        break;
                     default:
                         layout = strip4Layout
                         break;
