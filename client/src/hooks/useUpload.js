@@ -170,7 +170,15 @@ export function useUpload(requiredCount = 4) {
    try {
       const response = await uploadPhotoStrip(photos,filter,format);
       if (response.success) {
-        navigate("/preview");
+        console.log(response)
+        console.log(response.data)
+        navigate(`/share/${response.data.shareID}`, { 
+          state: {
+            url : response.data.imageUrl,
+            filename : response.data.filename,
+            from: "upload",
+          }
+        });
       }
     } catch (error) {
       console.error(error);

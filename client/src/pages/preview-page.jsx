@@ -2,14 +2,51 @@ import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import NavBar from "../components/navbar";
 import { PrimaryButton, BackLink } from "../components/common/StepFlow";
+import { useParams } from "react-router-dom";
 
 export default function PreviewPage() {
   const navigate  = useNavigate();
   const location  = useLocation();
+  const { shareId } = useParams();
 
-  // Data passed from Generate via navigate state (fallback to null gracefully)
-  const { url, filename } = location.state ?? {};
+  // Determine where "back" should go based on which flow created this strip
+  const backPath  = location.state?.from === "camera" ? "/camera" : "/upload";
+  const backLabel = location.state?.from === "camera" ? "back to camera" : "back to upload";
 
+  // fetch the strip 
+  const [strip, setStrip]     = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [errorType, setErrorType] = useState(null); // "expired" | "notfound" | "error"
+  const [copyFeedback, setCopyFeedback] = useState(false);
+
+useEffect(() => {
+    async function loadStrip() {
+      try {
+        const response = await fetch(
+            `http://localhost:3000/api/share/${shareId}`
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+            setStrip(data);
+        } else if (response.status === 410) {
+            setErrorType("expired");
+        } else if (response.status === 404) {
+            setErrorType("notfound");
+        } else {
+            setErrorType("error");
+        }
+      } catch (err) {
+        console.error("Failed to load strip:", err);
+        setErrorType("error");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadStrip();
+}, [shareId]);
   // Page entrance animation
   const [entered, setEntered] = useState(false);
   useEffect(() => {
@@ -19,19 +56,127 @@ export default function PreviewPage() {
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000${strip.imageUrl}`);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = strip.filename ?? "photo-strip.jpg";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download failed:", err);
+    }
+  };
+
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/share/${shareId}`;
+    
+    try {
+      // Try native share API first (mobile)
+      if (navigator.share) {
+        await navigator.share({
+          title: "Check out my photo strip!",
+          text: "View my photo strip",
+          url: shareUrl,
+        });
+        return;
+      }
+      
+      // Fallback: copy to clipboard
+      await navigator.clipboard.writeText(shareUrl);
+      setCopyFeedback(true);
+      setTimeout(() => setCopyFeedback(false), 2000);
+    } catch (err) {
+      console.error("Share failed:", err);
+    }
+  };
+
   const fade = (delay = 0) => ({
     opacity:   entered ? 1 : 0,
     transform: entered ? "translateY(0)" : "translateY(24px)",
     transition: `opacity 500ms ease ${delay}ms, transform 500ms cubic-bezier(0.33,1,0.68,1) ${delay}ms`,
   });
 
-  const handleDownload = () => {
-    if (!url) return;
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename ?? "photo-strip.jpg";
-    a.click();
-  };
+  // Guard: show nothing (or a spinner) while the fetch is in-flight
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-theme flex items-center justify-center">
+        <p className="font-main text-black/40 text-sm">Loading your strip…</p>
+      </div>
+    );
+  }
+
+  // Guard: strip not found or fetch failed
+  if (!strip) {
+    const isExpired = errorType === "expired";
+    return (
+      <div className="min-h-screen bg-theme flex flex-col">
+        <header className="sticky top-0 z-50 w-full px-8 pt-4 pb-2 md:px-6 md:pt-3 sm:px-4 sm:pt-2">
+          <NavBar />
+        </header>
+        <main className="flex-1 flex flex-col items-center justify-center gap-6 px-8 text-center">
+          {isExpired ? (
+            /* Hourglass icon */
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-black/25"
+              style={{ width: "clamp(2.5rem, 8vw, 4rem)", height: "clamp(2.5rem, 8vw, 4rem)" }}
+            >
+              <path d="M5 22h14" />
+              <path d="M5 2h14" />
+              <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" />
+              <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" />
+            </svg>
+          ) : (
+            /* Search / not found icon */
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-black/25"
+              style={{ width: "clamp(2.5rem, 8vw, 4rem)", height: "clamp(2.5rem, 8vw, 4rem)" }}
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+              <path d="M8 11h6" />
+            </svg>
+          )}
+          <div className="flex flex-col items-center gap-2">
+            <h1
+              className="font-main font-bold text-black tracking-tight"
+              style={{ fontSize: "clamp(1rem, 4vw, 1.75rem)" }}
+            >
+              {isExpired ? "This strip has expired" : "Strip not found"}
+            </h1>
+            <p
+              className="font-main italic text-black/45"
+              style={{ fontSize: "clamp(0.8rem, 1.8vw, 0.95rem)" }}
+            >
+              {isExpired
+                ? "Photo strips are only available for 2 hours after they're created."
+                : "This link doesn't exist or may have already been removed."}
+            </p>
+          </div>
+          <PrimaryButton onClick={() => navigate("/")}>
+            ← Back to Home
+          </PrimaryButton>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-theme flex flex-col">
@@ -41,7 +186,7 @@ export default function PreviewPage() {
           <NavBar />
         </div>
         <div className="mt-3 pl-1" style={fade(80)}>
-          <BackLink onClick={() => navigate("/upload")} label="back to upload" />
+          <BackLink onClick={() => navigate(backPath)} label={backLabel} />
         </div>
       </header>
 
@@ -51,7 +196,7 @@ export default function PreviewPage() {
         <div className="flex flex-col items-center gap-2 text-center" style={fade(100)}>
           <h1
             className="font-main font-bold text-black tracking-tight leading-none"
-            style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)" }}
+            style={{ fontSize: "clamp(1rem, 4vw, 2rem)" }}
           >
             Your Strip
           </h1>
@@ -59,24 +204,24 @@ export default function PreviewPage() {
             className="font-main italic text-black/50"
             style={{ fontSize: "clamp(0.85rem, 1.8vw, 1rem)" }}
           >
-            {url ? "Looking good! Save or start over." : "No strip generated yet."}
+            {strip.imageUrl ? "Looking good! Save or start over." : "No strip generated yet."}
           </p>
         </div>
 
         {/* Strip preview */}
         <div style={fade(200)}>
-          {url ? (
+          {strip.imageUrl ? (
             <div
               style={{
                 backgroundColor: "#ffffff",
                 padding: "10px 10px 0 10px",
                 boxShadow: "0 8px 40px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08)",
                 borderRadius: "2px",
-                width: "clamp(140px, 18vw, 220px)",
-              }}
+                width: "clamp(160px, 45vw, 220px)",
+              }}  
             >
               <img
-                src={`http://localhost:3000${url}`}
+                src={`http://localhost:3000${strip.imageUrl}`}
                 alt="Your generated photo strip"
                 style={{ width: "100%", display: "block" }}
               />
@@ -91,30 +236,6 @@ export default function PreviewPage() {
                   gap: "3px",
                 }}
               >
-                <p
-                  style={{
-                    fontFamily: '"DM Serif Display", serif',
-                    fontStyle: "italic",
-                    fontSize: "clamp(0.6rem, 1.3vw, 0.85rem)",
-                    color: "#1a1a1a",
-                    margin: 0,
-                  }}
-                >
-                  Sandali
-                </p>
-                <div style={{ width: "60%", height: "0.5px", backgroundColor: "#ccc", margin: "2px 0" }} />
-                <p
-                  style={{
-                    fontFamily: '"DM Serif Display", serif',
-                    fontSize: "clamp(0.4rem, 0.9vw, 0.6rem)",
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    color: "#555",
-                    margin: 0,
-                  }}
-                >
-                  Story in each Frame
-                </p>
               </div>
             </div>
           ) : (
@@ -130,14 +251,22 @@ export default function PreviewPage() {
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col items-center gap-3" style={fade(300)}>
-          {url && (
+        <div className="flex flex-col items-center gap-3 w-full" style={fade(300)}>
+          {strip.imageUrl && (
             <PrimaryButton onClick={handleDownload}>
               Download Strip ↓
             </PrimaryButton>
           )}
+          {strip.imageUrl && (
+            <button
+              onClick={handleShare}
+              className="font-main text-sm text-black/60 hover:text-primary transition-colors duration-200 cursor-pointer bg-transparent border-none p-0"
+            >
+              {copyFeedback ? "✓ Link copied!" : "Share →"}
+            </button>
+          )}
           <button
-            onClick={() => navigate("/upload")}
+            onClick={() => navigate(backPath)}
             className="font-main text-sm text-black/35 hover:text-primary transition-colors duration-200 cursor-pointer bg-transparent border-none p-0"
           >
             ← start over

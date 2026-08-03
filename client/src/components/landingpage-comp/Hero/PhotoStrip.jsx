@@ -36,7 +36,7 @@ export default function PhotoStrip({
         width: "112px",
         backgroundColor: "#ffffff",
         padding: "6px 6px 0 6px",
-        boxShadow: "0 8px 28px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.07)",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08)",
         borderRadius: "2px",
       }}
     >
@@ -46,7 +46,7 @@ export default function PhotoStrip({
           <div
             key={i}
             aria-hidden="true"
-            style={{ width: "100%", aspectRatio: "3/4", overflow: "hidden" }}
+            style={{ width: "100%", aspectRatio: "3/2", overflow: "hidden" }}
           >
             <img
               src={src}
@@ -77,7 +77,7 @@ export default function PhotoStrip({
           style={{
             fontFamily: '"DM Serif Display", serif',
             fontStyle: "italic",
-            fontSize: "0.65rem",
+            fontSize: "clamp(0.55rem, 1.2vw, 0.75rem)",
             color: "#1a1a1a",
             lineHeight: 1.2,
             margin: 0,
@@ -89,10 +89,10 @@ export default function PhotoStrip({
         <p
           style={{
             fontFamily: '"DM Serif Display", serif',
-            fontSize: "0.45rem",
+            fontSize: "clamp(0.4rem, 0.9vw, 0.55rem)",
             letterSpacing: "0.12em",
             textTransform: "uppercase",
-            color: "#666",
+            color: "#555",
             margin: 0,
           }}
         >

@@ -5,7 +5,8 @@
  * Live preview comes from LiveStripPreview.
  * This file only owns upload-specific logic and the PhotoGrid.
  */
-import { useEffect, useRef, useState } from "react";import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import NavBar from "../components/navbar";
 import FormatPicker, { FORMATS } from "../components/common/FormatPicker";
 import FilterPicker, { FILTERS } from "../components/common/FilterPicker";
@@ -18,7 +19,6 @@ import { useUpload } from "../hooks/useUpload";
 ───────────────────────────────────────────────────────────────── */
 function PhotoGrid({ photos, requiredCount, onRemove, onSlotClick, filter }) {
   const empty = Array.from({ length: requiredCount - photos.length });
-
 
   return (
     <div className="flex flex-wrap justify-center gap-4">
@@ -85,8 +85,6 @@ export default function UploadPage() {
   const { currentStep, displayStep, goToStep } = useStepFlow(1);
   const [format, setFormat] = useState(null);
   const [filter, setFilter] = useState(FILTERS[0]);
-  console.log(filter);
-  console.log(format);
 
   // Page entrance animation
   const [entered, setEntered] = useState(false);
@@ -107,19 +105,9 @@ export default function UploadPage() {
   const { photos, error, isFull, addPhotos, removePhoto, clearPhotos, Generate } =
     useUpload(requiredCount);
 
-  // Auto-advance to filter step once all slots filled
-  useEffect(() => {
-    if (isFull && currentStep === 2) {
-      const t = setTimeout(() => goToStep(3), 350);
-      return () => clearTimeout(t);
-    }
-  }, [isFull, currentStep]);
-
   const handleFormatChange = (newFormat) => {
     clearPhotos();
     setFormat(newFormat);
-    // Brief pause so the user sees their selection before advancing
-   // setTimeout(() => goToStep(2), 600);
   };
 
   const handleFileInput = (e) => {
@@ -128,6 +116,12 @@ export default function UploadPage() {
       e.target.value = "";
     }
   };
+
+  const handleChangePhotos = () => {
+    clearPhotos();
+    fileInputRef.current?.click();
+  };
+
   return (
     <div className="min-h-screen bg-theme flex flex-col">
 
@@ -180,9 +174,9 @@ export default function UploadPage() {
               />
               <FormatPicker selected={format?.id ?? null} onChange={handleFormatChange} />
               <div className="mt-8">
-                <PrimaryButton disabled={!format}
-                onClick={()=> goToStep(2)}
-                > Confirm Selection</PrimaryButton>
+                <PrimaryButton disabled={!format} onClick={() => goToStep(2)}>
+                  Confirm Selection
+                </PrimaryButton>
               </div>
             </StepPanel>
 
@@ -210,6 +204,16 @@ export default function UploadPage() {
                   {photos.length === 0 ? "Select Photos" : "Add More"}
                 </PrimaryButton>
               )}
+              {isFull && (
+                <div className="mt-6 flex items-center gap-4">
+                  <PrimaryButton onClick={handleChangePhotos}>
+                    Change Photos
+                  </PrimaryButton>
+                  <PrimaryButton onClick={() => goToStep(3)}>
+                    Confirm & Continue →
+                  </PrimaryButton>
+                </div>
+              )}
               <BackLink onClick={() => { clearPhotos(); goToStep(1); }} label="change format" />
             </StepPanel>
 
@@ -225,9 +229,7 @@ export default function UploadPage() {
                 onChange={setFilter}
                 previewSrc={photos[0]?.previewUrl}
               />
-              <p>{format ? "format exist" : "format is null"}</p>
-                <p>{filter ? "filter exist" : "filter is null"}</p>
-              <PrimaryButton onClick={()=>Generate({filter,format})} >
+              <PrimaryButton onClick={() => Generate({ filter, format })}>
                 Generate Strip →
               </PrimaryButton>
               <BackLink onClick={() => goToStep(2)} label="change photos" />

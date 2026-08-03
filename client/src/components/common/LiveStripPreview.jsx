@@ -47,13 +47,30 @@ export default function LiveStripPreview({
       </p>
 
       {/* ── Strip card ─────────────────────────────────────────── */}
+      {/*
+        Width logic:
+          - Desktop (sidebar): 18vw, capped at 160px
+          - Tablet/mobile (column layout, ≤1024px): 35vw, capped at 200px, min 130px
+        Handled via a scoped media query so this component stays self-contained.
+      */}
+      <style>{`
+        .live-strip-card {
+          width: clamp(100px, 18vw, 160px);
+        }
+        @media (max-width: 1024px) {
+          .live-strip-card {
+            width: clamp(130px, 35vw, 200px);
+          }
+        }
+      `}</style>
+
       <div
+        className="live-strip-card"
         style={{
-          width: "clamp(100px, 11vw, 140px)",
           backgroundColor: "#ffffff",
-          padding: "6px 6px 0 6px",   // white border on top + sides; bottom handled by label area
+          padding: "6px 6px 0 6px",
           boxShadow: "0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08)",
-          borderRadius: "2px",         // almost square — classic print feel
+          borderRadius: "2px",
         }}
       >
         {/* Photo slots */}
@@ -86,12 +103,23 @@ export default function LiveStripPreview({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: "1rem",
-                    color: "rgba(0,0,0,0.2)",
+                    color: "rgba(0,0,0,0.18)",
                   }}
                   aria-hidden="true"
                 >
-                  📸
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ width: "35%", height: "35%" }}
+                  >
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                    <circle cx="12" cy="13" r="4" />
+                  </svg>
                 </div>
               )}
             </div>

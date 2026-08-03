@@ -135,7 +135,7 @@ export function PrimaryButton({ onClick, children, disabled = false }) {
       disabled={disabled}
       className="
         bg-primary hover:bg-secondary text-white
-        font-main text-lg px-12 py-3.5 rounded-full
+        font-main text-lg px-8 sm:px-12 py-3.5 rounded-full
         shadow-md hover:shadow-lg
         transition-all duration-300 cursor-pointer select-none
         focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/40

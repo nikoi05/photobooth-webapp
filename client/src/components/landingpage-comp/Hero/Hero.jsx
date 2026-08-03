@@ -31,8 +31,7 @@ const STRIPS = [
     floatDuration: 7,
     floatOffset: 11,
     depth: "front",
-    visibleFrom: "always",
-    // Top-left: push inward so it doesn't overlap title
+    visibleFrom: "sm",   // hidden on < 480px to avoid title overlap
     positionStyle: {
       position: "absolute",
       top: "4%",
@@ -46,7 +45,7 @@ const STRIPS = [
     floatDuration: 9,
     floatOffset: 9,
     depth: "back",
-    visibleFrom: "sm",   // hidden on < 480 px
+    visibleFrom: "sm",   // hidden on < 480px
     positionStyle: {
       position: "absolute",
       top: "6%",
@@ -60,7 +59,7 @@ const STRIPS = [
     floatDuration: 6,
     floatOffset: 10,
     depth: "middle",
-    visibleFrom: "md",   // hidden on < 768 px
+    visibleFrom: "md",   // hidden on < 768px
     positionStyle: {
       position: "absolute",
       bottom: "4%",
@@ -74,7 +73,7 @@ const STRIPS = [
     floatDuration: 8,
     floatOffset: 12,
     depth: "front",
-    visibleFrom: "always",
+    visibleFrom: "sm",   // hidden on < 480px to avoid title overlap
     positionStyle: {
       position: "absolute",
       bottom: "5%",
