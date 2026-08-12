@@ -652,7 +652,7 @@ export default function CameraPage() {
 
       <header className="shrink-0 z-50 w-full px-4 pt-4 pb-2 sm:px-3 sm:pt-3">
         <div style={fade(0)}>
-          <NavBar backLabel="← options" onBack={() => navigate("/start")} />
+          <NavBar backLabel="options" onBack={() => navigate("/start")} />
         </div>
       </header>
 
