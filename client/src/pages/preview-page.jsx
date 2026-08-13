@@ -20,6 +20,7 @@ export default function PreviewPage() {
   const [loading, setLoading] = useState(true);
   const [errorType, setErrorType] = useState(null); // "expired" | "notfound" | "error"
   const [copyFeedback, setCopyFeedback] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
 useEffect(() => {
     async function loadStrip() {
@@ -211,11 +212,21 @@ useEffect(() => {
                 flexShrink: 0,
                 maxHeight: "70vh",
                 width: "auto",
+                opacity:   imgLoaded ? 1 : 0,
+                transform: imgLoaded ? "translateY(0) rotate(-0.5deg)" : "translateY(40px) rotate(-0.5deg)",
+                transition: "opacity 600ms cubic-bezier(0.33,1,0.68,1), transform 700ms cubic-bezier(0.22,1,0.36,1)",
               }}
             >
+              <style>{`
+                @keyframes strip-drop-shadow {
+                  0%   { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+                  100% { box-shadow: 0 12px 48px rgba(0,0,0,0.20), 0 2px 10px rgba(0,0,0,0.08); }
+                }
+              `}</style>
               <img
                 src={strip.imageUrl}
                 alt="Your generated photo strip"
+                onLoad={() => setImgLoaded(true)}
                 style={{
                   display: "block",
                   maxHeight: "calc(70vh - 60px)",
@@ -227,7 +238,15 @@ useEffect(() => {
             </div>
 
             {/* Action panel — left‑aligned on desktop, centred on mobile */}
-            <div className="flex flex-col gap-5 sm:items-center sm:text-center sm:w-full" style={{ maxWidth: "min(100%, 320px)" }}>
+            <div
+              className="flex flex-col gap-5 sm:items-center sm:text-center sm:w-full"
+              style={{
+                maxWidth: "min(100%, 320px)",
+                opacity:   imgLoaded ? 1 : 0,
+                transform: imgLoaded ? "translateY(0)" : "translateY(16px)",
+                transition: "opacity 500ms ease 200ms, transform 500ms cubic-bezier(0.33,1,0.68,1) 200ms",
+              }}
+            >
 
               <div className="flex flex-col gap-1 sm:items-center">
                 <h1

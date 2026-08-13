@@ -14,6 +14,7 @@ import { StepPanel, StepHeader, BackLink, PrimaryButton, useStepFlow } from "../
 import LiveStripPreview from "../components/common/LiveStripPreview";
 import { useUpload } from "../hooks/useUpload";
 import Footer, { FooterSlim } from "../components/footer";
+import PrintingOverlay from "../components/common/PrintingOverlay";
 
 /* ─────────────────────────────────────────────────────────────────
    PhotoGrid — upload-specific slot grid
@@ -103,7 +104,7 @@ export default function UploadPage() {
   });
 
   const requiredCount = format?.requiredCount ?? 4;
-  const { photos, error, isFull, addPhotos, removePhoto, clearPhotos, Generate } =
+  const { photos, error, isFull, isGenerating, addPhotos, removePhoto, clearPhotos, Generate } =
     useUpload(requiredCount);
 
   const handleFormatChange = (newFormat) => {
@@ -125,6 +126,8 @@ export default function UploadPage() {
 
   return (
     <div className="min-h-screen bg-theme flex flex-col">
+
+      <PrintingOverlay visible={isGenerating} />
 
       {/* Always-mounted hidden file input */}
       <input

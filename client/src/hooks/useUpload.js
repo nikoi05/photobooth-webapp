@@ -84,6 +84,7 @@ export function useUpload(requiredCount = 4) {
   const navigate = useNavigate();
   const [photos, setPhotos] = useState([]);
   const [error,  setError]  = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const addPhotos = useCallback(
     async (files) => {
@@ -164,27 +165,30 @@ export function useUpload(requiredCount = 4) {
   }, []);
 
   const Generate = async (data) => {
-    const filter = data.filter; // pass full object {id, css, label}
+    const filter = data.filter;
     const format = data.format.id;
-
+    setIsGenerating(true);
     try {
       const response = await uploadPhotoStrip(photos, filter, format);
 
-    if (!response.success) {
-      throw new Error(response.message || "Failed to generate photo strip.");
+      if (!response.success) {
+        throw new Error(response.message || "Failed to generate photo strip.");
+      }
+
+      navigate(`/share/${response.data.shareID}`, {
+        state: { from: "upload" },
+      });
+
+    } catch (error) {
+      console.error("[Generate] Failed:", error);
+    } finally {
+      setIsGenerating(false);
     }
-
-    navigate(`/share/${response.data.shareID}`, {
-      state: { from: "upload" },
-    });
-
-  } catch (error) {
-    console.error("[Generate] Failed:", error);
-  }
-};
+  };
   return {
     photos,
     error,
+    isGenerating,
     isFull: photos.length === requiredCount,
     addPhotos,
     removePhoto,

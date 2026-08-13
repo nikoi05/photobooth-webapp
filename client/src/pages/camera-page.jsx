@@ -23,6 +23,7 @@ import {
   useStepFlow,
 } from "../components/common/StepFlow";
 import LiveStripPreview from "../components/common/LiveStripPreview";
+import PrintingOverlay from "../components/common/PrintingOverlay";
 import useCamera from "../hooks/useCamera";
 import { uploadPhotoStrip } from "../services/upload.service";
 import Footer, { FooterSlim } from "../components/footer";
@@ -641,6 +642,9 @@ export default function CameraPage() {
   /* ── Render ─────────────────────────────────────────────────── */
   return (
     <div className="min-h-screen bg-theme flex flex-col">
+
+      {/* Printing overlay */}
+      <PrintingOverlay visible={isGenerating} />
 
       {/* Countdown pop keyframe — injected once */}
       <style>{`
