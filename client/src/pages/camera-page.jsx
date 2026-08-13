@@ -618,7 +618,7 @@ export default function CameraPage() {
     setGenError(null);
     try {
       // uploadPhotoStrip expects photos with a .file property
-      const response = await uploadPhotoStrip(photos, filter.id, format.id);
+      const response = await uploadPhotoStrip(photos, filter, format.id);
       if (response.success) {
         navigate(`/share/${response.data.shareID}`, {
           state: {
