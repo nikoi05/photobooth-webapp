@@ -8,6 +8,7 @@ import cleanupExpiredShares from "./services/cleanupShared.js";
 import cleanupOrphanedUploads from "./services/cleanupUploads.js";
 import "./database/init.js";
 import shareRoutes from "./routes/share.route.js";
+import testRoutes from "./routes/test.route.js";
 dotenv.config();
 
 const app = express();
@@ -24,6 +25,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/output", express.static("output"));
 app.use("/api/share", shareRoutes);
+app.use("/api/test", testRoutes);
 
 
 app.get("/", (req,res) =>{

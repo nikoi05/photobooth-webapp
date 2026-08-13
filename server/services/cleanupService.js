@@ -3,8 +3,7 @@ import path from "path";
 
 const OUTPUT_FOLDER = "./output";
 
-const EXPIRATION = 2 * 60 * 60 * 1000;
-const ttl = 60*1000; //test
+const EXPIRATION = 2 * 60 * 60 * 1000; // 2 hours
 
 
 export default async function cleanupExpiredOutputs(){

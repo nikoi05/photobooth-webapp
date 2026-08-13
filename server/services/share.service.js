@@ -2,8 +2,7 @@ import crypto from 'crypto';
 import db from "../database/database.js";
 
 
-const TTL = 2*60*60*1000; // 2 hours in milliseconds
-const test =60*1000; // 1 minute in milliseconds
+const TTL = 2 * 60 * 60 * 1000; // 2 hours
 
 export default function createShare(filename){
     const shareID = crypto.randomUUID();

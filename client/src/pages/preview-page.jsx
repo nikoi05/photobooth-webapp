@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import NavBar from "../components/navbar";
 import { PrimaryButton, BackLink } from "../components/common/StepFlow";
 import { useParams } from "react-router-dom";
+import Footer, { FooterSlim } from "../components/footer";
 
 export default function PreviewPage() {
   const navigate  = useNavigate();
@@ -174,6 +175,7 @@ useEffect(() => {
             ← Back to Home
           </PrimaryButton>
         </main>
+        <FooterSlim />
       </div>
     );
   }
@@ -292,6 +294,7 @@ useEffect(() => {
         )}
 
       </main>
+      <FooterSlim />
     </div>
   );
 }

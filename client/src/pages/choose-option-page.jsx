@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../components/navbar";
+import Footer, { FooterSlim } from "../components/footer";
 
 /* ── Icons ──────────────────────────────────────────────────────── */
 const UploadIcon = () => (
@@ -171,6 +172,8 @@ export default function ChooseInputPage() {
 
         </div>
       </main>
+
+      <FooterSlim />
 
     </div>
   );

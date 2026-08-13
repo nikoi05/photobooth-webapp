@@ -69,3 +69,24 @@ export default function Footer() {
     </footer>
   );
 }
+
+/**
+ * FooterSlim — minimal one-line footer for inner pages.
+ * Just the copyright text and privacy note, no links.
+ */
+export function FooterSlim() {
+  const year = new Date().getFullYear();
+
+  return (
+    <footer className="w-full bg-primary py-4 px-8 md:px-6 sm:px-4">
+      <div className="max-w-5xl mx-auto flex justify-between items-center sm:flex-col sm:gap-1 sm:text-center">
+        <p className="font-main text-white/50 text-xs">
+          &copy; {year} Sandali. Built by Niko for Emilia
+        </p>
+        <p className="font-main text-white/40 text-xs">
+          No data stored. No account needed.
+        </p>
+      </div>
+    </footer>
+  );
+}

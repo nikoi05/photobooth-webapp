@@ -13,6 +13,7 @@ import FilterPicker, { FILTERS } from "../components/common/FilterPicker";
 import { StepPanel, StepHeader, BackLink, PrimaryButton, useStepFlow } from "../components/common/StepFlow";
 import LiveStripPreview from "../components/common/LiveStripPreview";
 import { useUpload } from "../hooks/useUpload";
+import Footer, { FooterSlim } from "../components/footer";
 
 /* ─────────────────────────────────────────────────────────────────
    PhotoGrid — upload-specific slot grid
@@ -123,7 +124,7 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="h-svh bg-theme flex flex-col overflow-hidden">
+    <div className="min-h-screen bg-theme flex flex-col">
 
       {/* Always-mounted hidden file input */}
       <input
@@ -143,13 +144,13 @@ export default function UploadPage() {
 
       <main className="flex-1 flex justify-center px-4 py-3 sm:px-3 overflow-y-auto">
         <div
-          className="w-full flex items-center gap-6 lg:flex-row flex-col"
-          style={{ justifyContent: "center", ...fade(160) }}
+          className="w-full flex items-center gap-10 lg:flex-row flex-col"
+          style={{ justifyContent: "center", maxWidth: "fit-content", margin: "0 auto", ...fade(160) }}
         >
           {/* ── Steps — centered alone on step 1, shifts left when preview appears ── */}
           <div
             style={{
-              flex: currentStep >= 2 ? "1" : "0 0 auto",
+              flex: currentStep >= 2 ? "0 1 auto" : "0 0 auto",
               width: currentStep >= 2 ? "auto" : "100%",
               margin: currentStep >= 2 ? "0" : "0 auto",
               transition: "flex 1000ms ease, margin 500ms ease-in-out",
@@ -246,6 +247,7 @@ export default function UploadPage() {
 
         </div>
       </main>
+      <FooterSlim />
     </div>
   );
 }
