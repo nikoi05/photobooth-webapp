@@ -124,7 +124,7 @@ export default function ChooseInputPage() {
     <div className="min-h-screen bg-theme flex flex-col">
 
       <header className="sticky top-0 z-50 w-full px-8 pt-6 pb-2 md:px-6 md:pt-5 sm:px-4 sm:pt-4">
-        <NavBar />
+        <NavBar backLabel="home" onBack={() => navigate("/")} />
       </header>
 
       <main className="flex-1 flex items-center justify-center px-8 md:px-6 sm:px-4">

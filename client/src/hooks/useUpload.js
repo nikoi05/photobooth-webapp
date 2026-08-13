@@ -164,26 +164,32 @@ export function useUpload(requiredCount = 4) {
   }, []);
 
   const Generate = async (data) => {
-  
   const filter = data.filter.id;
   const format = data.format.id;
-   try {
-      const response = await uploadPhotoStrip(photos,filter,format);
-      if (response.success) {
-        console.log(response)
-        console.log(response.data)
-        navigate(`/share/${response.data.shareID}`, { 
-          state: {
-            url : response.data.imageUrl,
-            filename : response.data.filename,
-            from: "upload",
-          }
-        });
-      }
-    } catch (error) {
-      console.error(error);
+
+  try {
+    const response = await uploadPhotoStrip(
+      photos,
+      filter,
+      format
+    );
+
+    if (!response.success) {
+      throw new Error(
+        response.message || "Failed to generate photo strip."
+      );
     }
-  };
+
+    console.log("Generated:", response.data);
+
+    navigate(`/share/${response.data.shareID}`, {
+      state: { from: "upload" },
+    });
+
+  } catch (error) {
+    console.error("[Generate] Failed:", error);
+  }
+};
   return {
     photos,
     error,

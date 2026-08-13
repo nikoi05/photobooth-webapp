@@ -48,10 +48,10 @@ export default function NavBar({ backLabel, onBack }) {
             </button>
           )}
 
-          {/* Brand — always goes to landing page */}
+          {/* Brand — always visible, always goes to landing page */}
           <button
             onClick={() => navigate("/")}
-            className={`text-black font-main text-2xl md:text-xl hover:text-primary transition-colors duration-200 cursor-pointer bg-transparent border-none p-0 ${backLabel ? "hidden sm:block" : ""}`}
+            className="text-black font-main text-2xl md:text-xl hover:text-primary transition-colors duration-200 cursor-pointer bg-transparent border-none p-0"
           >
             Sandali
           </button>

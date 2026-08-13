@@ -7,6 +7,7 @@
 import strip4Layout from "./layouts/strip-4-layout.js";
 import strip3Layout from "./layouts/strip-3-layouts.js";
 import strip2Layout from "./layouts/strip-2-layout.js";
+import { uploadImage } from "./StorageService.js";
 
     export  default async function processImage(filePath, formatId, filterId) {
         //decider
@@ -57,27 +58,41 @@ import strip2Layout from "./layouts/strip-2-layout.js";
              
             // the filepath uuid for the output file
             const filename = `${crypto.randomUUID()}.jpg`;
+            //generate the final image directly to buffer
+            const outputbuffer = await template.composite(composite).jpeg().toBuffer();
             const outputPath = path.join("output", filename);
-            //composite the image with the template
-           await template.composite(
-                composite).toFile(outputPath);
-            const share = createShare(filename);
-            for( const file of  filePath){
-                try{
-                    await fs.unlink(file.path);
-                    console.log(`Deleted file: ${file.path}`);
-                }catch(err){
-                    console.error(`Error deleting file ${file.path}:`, err);
-                }
+            //path inside the supabase storage
+            const storagePath = `outputs/${filename}`;
+            
+            await uploadImage(outputbuffer,storagePath,"image/jpeg");
+
+            const share = await createShare(storagePath);
+
+            //delete temporary uploadedfiles
+            for(const file of filePath){
+                  try {
+                await fs.unlink(file.path);
+                console.log(`Deleted file: ${file.path}`);
+            } catch (err) {
+                console.error(
+                    `Error deleting file ${file.path}:`,
+                    err
+                );
             }
-            return {
-                success: true,
-                message: "Image processed successfully",
-                filename: filename,
-                shareID: share.shareID,
-                expiresAt: share.expiresAt,
-                imageUrl: `/output/${filename}`
-            };
+            }
+             return {
+            success: true,
+            message: "Image processed successfully",
+
+            filename,
+
+            shareID: share.shareID,
+
+            expiresAt: share.expiresAt,
+
+            storagePath
+        };
+
 
         }catch(error){
             console.error("Error processing image:", error);

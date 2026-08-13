@@ -1,3 +1,4 @@
+import { API_URL } from "../config/api.js";
 export async function uploadPhotoStrip(photos,filter,format){
         const formData = new FormData();
 
@@ -9,7 +10,7 @@ export async function uploadPhotoStrip(photos,filter,format){
         formData.append("filterId",filter);
 
     
-         const response = await fetch("http://localhost:3000/api/upload/generate",{
+         const response = await fetch(`${API_URL}/api/upload/generate`,{
                 method: "POST",
                 body:formData,
          });

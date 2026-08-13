@@ -4,6 +4,7 @@ import NavBar from "../components/navbar";
 import { PrimaryButton, BackLink } from "../components/common/StepFlow";
 import { useParams } from "react-router-dom";
 import Footer, { FooterSlim } from "../components/footer";
+import { API_URL } from "../config/api.js";
 
 export default function PreviewPage() {
   const navigate  = useNavigate();
@@ -11,8 +12,8 @@ export default function PreviewPage() {
   const { shareId } = useParams();
 
   // Determine where "back" should go based on which flow created this strip
-  const backPath  = location.state?.from === "camera" ? "/camera" : "/upload";
-  const backLabel = location.state?.from === "camera" ? "back to camera" : "back to upload";
+  const backPath  = location.state?.from === "camera" ? "/camera" : location.state?.from === "upload" ? "/upload" : "/";
+  const backLabel = location.state?.from === "camera" ? "back to camera" : location.state?.from === "upload" ? "back to upload" : "home";
 
   // fetch the strip 
   const [strip, setStrip]     = useState(null);
@@ -24,7 +25,7 @@ useEffect(() => {
     async function loadStrip() {
       try {
         const response = await fetch(
-            `http://localhost:3000/api/share/${shareId}`
+            `${API_URL}/api/share/${shareId}`
         );
 
         const data = await response.json();
@@ -59,7 +60,7 @@ useEffect(() => {
 
   const handleDownload = async () => {
     try {
-      const response = await fetch(`http://localhost:3000${strip.imageUrl}`);
+      const response = await fetch(strip.imageUrl);
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -192,15 +193,15 @@ useEffect(() => {
         </div>
       </header>
 
-      <main className="flex-1 flex items-center justify-center px-8 py-6 md:px-6 sm:px-4 overflow-hidden">
+      <main className="flex-1 flex items-center justify-center px-8 py-6 md:px-6 sm:px-5 sm:py-4">
 
         {strip.imageUrl ? (
-          /* ── Strip left, actions right ──────────────────────── */
+          /* ── Strip left, actions right on desktop; stacked on mobile ── */
           <div
-            className="flex flex-row items-center justify-center gap-10 md:gap-8 w-full max-w-3xl"
+            className="flex flex-row items-center justify-center gap-10 md:gap-8 sm:flex-col sm:gap-6 w-full max-w-3xl"
             style={fade(100)}
           >
-            {/* Strip — height-constrained so it never pushes buttons off screen */}
+            {/* Strip — width scales with available space, max 50vw on desktop */}
             <div
               style={{
                 backgroundColor: "#ffffff",
@@ -208,30 +209,27 @@ useEffect(() => {
                 boxShadow: "0 12px 48px rgba(0,0,0,0.20), 0 2px 10px rgba(0,0,0,0.08)",
                 borderRadius: "2px",
                 flexShrink: 0,
-                maxHeight: "80vh",
+                maxHeight: "70vh",
                 width: "auto",
-                display: "flex",
-                flexDirection: "column",
               }}
             >
               <img
-                src={`http://localhost:3000${strip.imageUrl}`}
+                src={strip.imageUrl}
                 alt="Your generated photo strip"
                 style={{
                   display: "block",
-                  maxHeight: "calc(80vh - 60px)",
+                  maxHeight: "calc(70vh - 60px)",
+                  maxWidth: "min(50vw, 400px)",
                   width: "auto",
                   objectFit: "contain",
                 }}
               />
-              {/* Bottom label */}
-             
             </div>
 
-            {/* Action panel */}
-            <div className="flex flex-col gap-5">
+            {/* Action panel — left‑aligned on desktop, centred on mobile */}
+            <div className="flex flex-col gap-5 sm:items-center sm:text-center sm:w-full" style={{ maxWidth: "min(100%, 320px)" }}>
 
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 sm:items-center">
                 <h1
                   className="font-main font-bold text-black tracking-tight leading-none"
                   style={{ fontSize: "clamp(1.6rem, 3vw, 2.8rem)" }}
@@ -245,7 +243,7 @@ useEffect(() => {
 
               <div className="w-10 h-px bg-primary/25" />
 
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 w-full">
                 <PrimaryButton onClick={handleDownload}>
                   Download Strip ↓
                 </PrimaryButton>

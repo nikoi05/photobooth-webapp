@@ -1,26 +1,43 @@
-import crypto from 'crypto';
-import db from "../database/database.js";
-
+import crypto from "crypto";
+import supabase from "../database/supabase.js";
 
 const TTL = 2 * 60 * 60 * 1000; // 2 hours
 
-export default function createShare(filename){
+export default async function createShare(storagePath) {
     const shareID = crypto.randomUUID();
-    const createdAt = Date.now();
-    const expiresAt = createdAt + TTL;
 
-    db.prepare(`
-        INSERT INTO shares (share_id, filename, created_at, expires_at)
-        VALUES (?, ?, ?, ?)
-    `).run(shareID, filename, createdAt, expiresAt);
+    const createdAt = new Date();
+    const expiresAt = new Date(Date.now() + TTL);
 
-    return { shareID, expiresAt };
+    const { error } = await supabase
+        .from("shares")
+        .insert({
+            share_id: shareID,
+            storage_path: storagePath,
+            created_at: createdAt.toISOString(),
+            expires_at: expiresAt.toISOString()
+        });
 
+    if (error) {
+        throw new Error(`Failed to create share: ${error.message}`);
+    }
+
+    return {
+        shareID,
+        expiresAt: expiresAt.getTime()
+    };
 }
 
-export  function getShare(shareID){
-    const share = db.prepare(`
-        SELECT * FROM shares WHERE share_id = ?
-    `).get(shareID); 
+export async function getShare(shareID) {
+    const { data, error } = await supabase
+        .from("shares")
+        .select("*")
+        .eq("share_id", shareID)
+        .maybeSingle();
 
-    return share;}
+    if (error) {
+        throw new Error(`Failed to get share: ${error.message}`);
+    }
+
+    return data;
+}
