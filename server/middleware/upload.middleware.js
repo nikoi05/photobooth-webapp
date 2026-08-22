@@ -25,7 +25,9 @@ const storage = multer.diskStorage({
 const allowedMimeTypes = [
     "image/jpeg",
     "image/png",
-    "image/webp"
+    "image/webp",
+    "image/heic",
+    "image/heif"
 ];
 
 const fileFilter = (req, file, cb) => {
@@ -34,7 +36,7 @@ const fileFilter = (req, file, cb) => {
     } else {
         cb(
             new Error(
-                "Only JPEG, PNG, and WEBP images are allowed"
+                "Only JPEG, PNG, WEBP, and HEIC images are allowed"
             ),
             false
         );

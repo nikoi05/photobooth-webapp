@@ -29,19 +29,32 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { uploadPhotoStrip } from "../services/upload.service";
+import { convertHeicToJpeg, isHeicFile } from "../services/convertHeic";
 
-const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
 const MAX_SIZE_BYTES = 25 * 1024 * 1024;
+
+// On Windows, Chrome/Edge report HEIC files with an empty MIME type string.
+// Fall back to checking the file extension when type is blank.
+function getEffectiveMimeType(file) {
+  if (file.type) return file.type;
+  if (isHeicFile(file)) return "image/heic";
+  return "";
+}
 
 /* ─────────────────────────────────────────────────────────────────
    createPhotoEntry
-   Async — creates a preview URL, loads the image to read its natural
-   dimensions, computes metadata, and returns the enriched entry.
+   Async — converts HEIC to JPEG if needed, creates a preview URL,
+   loads the image to read its natural dimensions, computes metadata,
+   and returns the enriched entry.
    Revokes the preview URL and rejects if the image fails to load.
 ───────────────────────────────────────────────────────────────── */
-function createPhotoEntry(file) {
+async function createPhotoEntry(file) {
+  // Convert HEIC → JPEG before creating the preview so the browser can display it
+  const jpegFile = await convertHeicToJpeg(file);
+
   return new Promise((resolve, reject) => {
-    const previewUrl = URL.createObjectURL(file);
+    const previewUrl = URL.createObjectURL(jpegFile);
 
     const img = new Image();
 
@@ -56,7 +69,7 @@ function createPhotoEntry(file) {
         "square";
 
       resolve({
-        file,
+        file: jpegFile,   // store the converted JPEG, not the original HEIC
         previewUrl,
         width,
         height,
@@ -93,8 +106,9 @@ export function useUpload(requiredCount = 4) {
 
       // ── Validation ──────────────────────────────────────────
       for (const file of incoming) {
-        if (!ACCEPTED_TYPES.includes(file.type)) {
-          setError(`"${file.name}" is not a supported image type (JPEG, PNG, WebP).`);
+        const mimeType = getEffectiveMimeType(file);
+        if (!ACCEPTED_TYPES.includes(mimeType)) {
+          setError(`"${file.name}" is not a supported image type (JPEG, PNG, WebP, HEIC).`);
           return;
         }
         if (file.size > MAX_SIZE_BYTES) {

@@ -1,5 +1,6 @@
 import { API_URL } from "../config/api.js";
 import { applyFilterToImage } from "./applyFilterToImage.js";
+import { convertHeicToJpeg } from "./convertHeic.js";
 
 /**
  * uploadPhotoStrip
@@ -13,19 +14,23 @@ import { applyFilterToImage } from "./applyFilterToImage.js";
  * @param {{ id: string, css: string }|string}      filter  — full filter object or just the id
  * @param {string}                                  format  — format id
  */
+
 export async function uploadPhotoStrip(photos, filter, format) {
     const filterCss = typeof filter === "object" ? filter.css : null;
 
     const formData = new FormData();
-
+    
     // Apply CSS filter on canvas before uploading
     for (let i = 0; i < photos.length; i++) {
         const photo = photos[i];
         const filename = `photo-${i + 1}.jpg`;
 
+        // Convert HEIC → JPEG first, then apply filter
+        const jpegFile = await convertHeicToJpeg(photo.file);
+
         const filteredFile = filterCss
-            ? await applyFilterToImage(photo.file, filterCss, filename)
-            : photo.file;
+            ? await applyFilterToImage(jpegFile, filterCss, filename)
+            : jpegFile;
 
         formData.append("photos", filteredFile, filename);
     }

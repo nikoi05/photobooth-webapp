@@ -133,7 +133,7 @@ export default function UploadPage() {
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/jpeg,image/png,image/webp,image/heic"
         multiple
         className="hidden"
         onChange={handleFileInput}
