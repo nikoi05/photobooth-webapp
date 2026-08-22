@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import NavBar from "../components/navbar";
 import FormatPicker, { FORMATS } from "../components/common/FormatPicker";
 import FilterPicker, { FILTERS } from "../components/common/FilterPicker";
+import { adjustmentsToCss } from "../services/filter-engine/index.js";
 import { StepPanel, StepHeader, BackLink, PrimaryButton, useStepFlow } from "../components/common/StepFlow";
 import LiveStripPreview from "../components/common/LiveStripPreview";
 import { useUpload } from "../hooks/useUpload";
@@ -34,7 +35,7 @@ function PhotoGrid({ photos, requiredCount, onRemove, onSlotClick, filter }) {
             src={photo.previewUrl}
             alt={`Photo ${i + 1}`}
             className="w-full h-full object-cover"
-            style={{ filter: filter?.css ?? "none" }}
+            style={{ filter: adjustmentsToCss(filter?.adjustments) }}
           />
           <span className="absolute bottom-1.5 left-2 font-main text-white/70 text-xs select-none">
             {i + 1}

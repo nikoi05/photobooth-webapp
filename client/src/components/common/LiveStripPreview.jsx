@@ -1,4 +1,5 @@
 /**
+/**
  * LiveStripPreview
  *
  * Reusable live photo strip preview styled after a classic physical photobooth strip:
@@ -16,6 +17,8 @@
  *   title         {string}   Optional name/title line (italic script)
  *   subtitle      {string}   Optional subtitle (small caps)
  */
+
+import { adjustmentsToCss } from "../../services/filter-engine/index.js";
 
 const PLACEHOLDER_COLORS = ["#d6c9b8", "#cbbfaf", "#c0b5a6", "#b5ab9c"];
 
@@ -89,7 +92,7 @@ export default function LiveStripPreview({
                     height: "100%",
                     objectFit: "cover",
                     display: "block",
-                    filter: filter?.css ?? "none",
+                    filter: adjustmentsToCss(filter?.adjustments),
                     transition: "filter 350ms ease",
                   }}
                 />

@@ -1,53 +1,64 @@
 /**
  * applyFilterToImage
  *
- * Draws a photo onto a canvas with a CSS filter applied, then returns
- * a File containing the filtered image as a JPEG.
+ * Applies a filter to an image file using deterministic pixel processing.
+ * Returns a new JPEG File with the filter baked into the pixels.
  *
- * This guarantees the uploaded image looks exactly like the browser preview —
- * no server-side approximation needed.
+ * This replaces the old ctx.filter approach which produced inconsistent
+ * results across browsers — particularly iOS Safari vs Chrome/Edge.
  *
- * @param {File|Blob} file       — original image file
- * @param {string}    filterCss  — CSS filter string e.g. "sepia(0.5) saturate(1.3)"
- * @param {string}    filename   — output filename
+ * Pipeline:
+ *   File → Image → Canvas → getImageData → applyPixelFilter → putImageData → toBlob → File
+ *
+ * The pixel math uses the same W3C matrix spec as the server-side filterService.js,
+ * so preview, client export, and server all produce consistent results.
+ *
+ * @param {File|Blob} file    — source image (must be JPEG/PNG/WebP, not HEIC)
+ * @param {object}    filter  — full filter object { id, label, adjustments }
+ * @param {string}    filename
  * @returns {Promise<File>}
  */
-export async function applyFilterToImage(file, filterCss, filename) {
-  // "none" or empty — return the original file unchanged
-  if (!filterCss || filterCss === "none") return file;
+import { applyPixelFilter } from "./filter-engine/index.js";
 
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
+export async function applyFilterToImage(file, filter, filename) {
+    // No filter or "none" — return the original file, no re-encoding
+    if (!filter || filter.id === "none" || !filter.adjustments) return file;
 
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width  = img.naturalWidth;
-      canvas.height = img.naturalHeight;
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
 
-      const ctx = canvas.getContext("2d");
+        img.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width  = img.naturalWidth;
+            canvas.height = img.naturalHeight;
 
-      // Apply the CSS filter — the browser renders it exactly as the preview
-      ctx.filter = filterCss;
-      ctx.drawImage(img, 0, 0);
+            const ctx = canvas.getContext("2d");
 
-      URL.revokeObjectURL(url);
+            // Draw the raw image — no ctx.filter, no browser compositor involved
+            ctx.drawImage(img, 0, 0);
+            URL.revokeObjectURL(url);
 
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) return reject(new Error("Canvas toBlob failed"));
-          resolve(new File([blob], filename, { type: "image/jpeg" }));
-        },
-        "image/jpeg",
-        0.92
-      );
-    };
+            // Read pixels, apply deterministic filter math, write back
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            applyPixelFilter(imageData, filter.adjustments);
+            ctx.putImageData(imageData, 0, 0);
 
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error(`Failed to load image for filtering: ${file.name}`));
-    };
+            canvas.toBlob(
+                (blob) => {
+                    if (!blob) return reject(new Error("Canvas toBlob failed"));
+                    resolve(new File([blob], filename, { type: "image/jpeg" }));
+                },
+                "image/jpeg",
+                0.92
+            );
+        };
 
-    img.src = url;
-  });
+        img.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error(`Failed to load image for filtering: ${file.name}`));
+        };
+
+        img.src = url;
+    });
 }

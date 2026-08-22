@@ -5,47 +5,42 @@ import { convertHeicToJpeg } from "./convertHeic.js";
 /**
  * uploadPhotoStrip
  *
- * Applies the CSS filter to each photo in the browser (exact pixel match
- * with the live preview), then uploads the filtered images to the backend.
- * The backend receives filterId "none" so it composites without any
- * additional processing.
+ * For each photo:
+ *   1. convertHeicToJpeg  — HEIC → JPEG + fix EXIF orientation (no-op if already JPEG)
+ *   2. applyFilterToImage — bake filter into pixels using deterministic pixel engine
+ *   3. append to FormData
+ *
+ * The backend receives already-filtered JPEGs and filterId "none" so it
+ * composites without applying any filter a second time.
  *
  * @param {Array<{file: File, previewUrl: string}>} photos
- * @param {{ id: string, css: string }|string}      filter  — full filter object or just the id
- * @param {string}                                  format  — format id
+ * @param {{ id: string, label: string, adjustments: object }} filter
+ * @param {string} format — format id e.g. "strip-4"
  */
-
 export async function uploadPhotoStrip(photos, filter, format) {
-    const filterCss = typeof filter === "object" ? filter.css : null;
-
     const formData = new FormData();
-    
-    // Apply CSS filter on canvas before uploading
+
     for (let i = 0; i < photos.length; i++) {
-        const photo = photos[i];
+        const photo    = photos[i];
         const filename = `photo-${i + 1}.jpg`;
 
-        // Convert HEIC → JPEG first, then apply filter
+        // Step 1 — convert HEIC → JPEG and fix EXIF orientation
         const jpegFile = await convertHeicToJpeg(photo.file);
 
-        const filteredFile = filterCss
-            ? await applyFilterToImage(jpegFile, filterCss, filename)
-            : jpegFile;
+        // Step 2 — bake filter into pixels (no-op if filter.id === "none")
+        const filteredFile = await applyFilterToImage(jpegFile, filter, filename);
 
         formData.append("photos", filteredFile, filename);
     }
 
-    // Filter is already baked in — tell backend to skip it
+    // Filter already baked in — tell backend to skip it
     formData.append("FormatId", format);
     formData.append("filterId", "none");
 
-    const response = await fetch(
-        `${API_URL}/api/upload/generate`,
-        {
-            method: "POST",
-            body: formData,
-        }
-    );
+    const response = await fetch(`${API_URL}/api/upload/generate`, {
+        method: "POST",
+        body: formData,
+    });
 
     const text = await response.text();
     if (!response.ok) {

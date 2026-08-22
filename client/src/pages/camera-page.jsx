@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import NavBar from "../components/navbar";
 import FormatPicker from "../components/common/FormatPicker";
 import FilterPicker, { FILTERS } from "../components/common/FilterPicker";
+import { adjustmentsToCss } from "../services/filter-engine/index.js";
 import {
   StepPanel,
   StepHeader,
@@ -420,7 +421,7 @@ function CameraView({
                 src={photo.previewUrl}
                 alt={`Captured photo ${i + 1}`}
                 className="w-full h-full object-cover"
-                style={{ filter: filter?.css ?? "none" }}
+                style={{ filter: adjustmentsToCss(filter?.adjustments) }}
               />
               <span className="absolute bottom-0.5 left-1 font-main text-white/60 text-xs select-none">
                 {i + 1}
